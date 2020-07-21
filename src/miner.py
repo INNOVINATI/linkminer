@@ -1,5 +1,4 @@
 from collections import Counter
-from urllib.parse import urlparse
 
 from graphviz import Digraph
 
@@ -9,14 +8,13 @@ from src.crawler import Crawler
 class Miner:
     data = None
 
-    def __init__(self, from_urls, to_domains):
-        self.sources = set([urlparse(url).netloc for url in from_urls])
-        self.crawler = Crawler(urls=from_urls, domains=to_domains)
+    def __init__(self, left: list, right: list):
+        self.crawler = Crawler(left=left, right=right)
         self.graph = Digraph(strict=True, engine='circo')
         self.graph.graph_attr['overlap'] = 'false'
 
-    def extract(self):
-        self.data = self.crawler.run()
+    def extract(self, deep=False):
+        self.data = self.crawler.run(deep=deep)
         nodes = Counter(self.data['nodes'])
         top = max(nodes.values())
         for node in nodes.keys():

@@ -15,6 +15,8 @@ EDGES = []
 class Link(Item):
     from_subpage = Field()
     to_subpage = Field()
+    source = Field()
+    target = Field()
 
 
 class Pipeline:
@@ -46,10 +48,9 @@ class Spider(BaseSpider):
 
 
 class Crawler:
-    def __init__(self, left, right, deep=False):
+    def __init__(self, left, right):
         self.left = left
         self.right = right
-        self.deep = deep
         self.engine = CrawlerProcess({
             'USER_AGENT': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1',
             'LOG_LEVEL': 'INFO',
@@ -59,10 +60,13 @@ class Crawler:
             'RETRY_ENABLED': False,
         })
 
-    def run(self):
-        if self.deep:
-            self.engine.crawl(Spider, start_urls=self.right, allowed_domains=self.left)
-        self.engine.crawl(Spider, start_urls=self.left, allowed_domains=self.right)
+    def run(self, deep):
+        if deep:
+            self.engine.crawl(Spider, start_urls=self.right, allowed_domains=self.domains(self.left))
+        self.engine.crawl(Spider, start_urls=self.left, allowed_domains=self.domains(self.right))
         self.engine.start()
         return {'nodes': NODES, 'edges': EDGES}
 
+    @staticmethod
+    def domains(urls):
+        return [urlparse(url).netloc for url in urls]
