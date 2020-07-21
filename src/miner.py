@@ -6,7 +6,7 @@ from graphviz import Digraph
 from src.crawler import Crawler
 
 
-class Miner:
+class LinkMiner:
     data = None
 
     def __init__(self, sources: list, targets: list):
