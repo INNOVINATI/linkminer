@@ -1,3 +1,4 @@
+import json
 from collections import Counter
 
 from graphviz import Digraph
@@ -13,8 +14,8 @@ class Miner:
         self.graph = Digraph(strict=True, engine='circo')
         self.graph.graph_attr['overlap'] = 'false'
 
-    def extract(self, deep=False):
-        self.data = self.crawler.run(deep=deep)
+    def extract(self):
+        self.data = self.crawler.run()
         nodes = Counter(self.data['nodes'])
         top = max(nodes.values())
         for node in nodes.keys():
@@ -28,5 +29,7 @@ class Miner:
     def render(self, filename='untitled'):
         self.graph.render(f'{filename}.gv', view=True)
 
-    def export(self, filename, ftype='csv'):
-        pass
+    def export_json(self, filename):
+        string = json.dumps(self.data['edges'])
+        with open(f'{filename}.json', 'w') as file:
+            file.write(string)
