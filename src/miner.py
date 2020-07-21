@@ -8,8 +8,8 @@ from src.crawler import Crawler
 class Miner:
     data = None
 
-    def __init__(self, left: list, right: list):
-        self.crawler = Crawler(left=left, right=right)
+    def __init__(self, sources: list, targets: list):
+        self.crawler = Crawler(sources=sources, targets=targets)
         self.graph = Digraph(strict=True, engine='circo')
         self.graph.graph_attr['overlap'] = 'false'
 
@@ -19,8 +19,8 @@ class Miner:
         top = max(nodes.values())
         for node in nodes.keys():
             self.graph.node(node, node, **{
-                'size': str(max([nodes[node], top / 4])),
-                'fontsize': str(max([nodes[node], top / 4]))
+                'size': str(max([nodes[node], int(top/4)])),
+                'fontsize': str(max([nodes[node], int(top/4)]))
             })
         for edge in self.data['edges']:
             self.graph.edge(edge['source'], edge['target'])

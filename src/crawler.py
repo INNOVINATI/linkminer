@@ -1,7 +1,5 @@
-from collections import Counter
 from urllib.parse import urlparse
 
-from graphviz import Digraph
 from scrapy import Request, Item, Field
 from scrapy.crawler import CrawlerProcess
 from scrapy.spiders import Spider as BaseSpider
@@ -38,8 +36,7 @@ class Spider(BaseSpider):
         extract_links = LinkExtractor(allow_domains=self.allowed_domains, unique=True).extract_links(response)
         follow_links = LinkExtractor(allow=(), deny_domains=self.allowed_domains, unique=True).extract_links(response)
         for link in follow_links:
-            if response.meta['root'] in link.url:
-                yield Request(link.url, callback=self.parse, meta=response.meta)
+            yield Request(link.url, callback=self.parse, meta=response.meta)
         for link in extract_links:
             item = Link()
             item['from_subpage'] = response.url
@@ -48,9 +45,9 @@ class Spider(BaseSpider):
 
 
 class Crawler:
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
+    def __init__(self, sources, targets):
+        self.sources = sources
+        self.targets = [urlparse(url).netloc for url in targets]
         self.engine = CrawlerProcess({
             'USER_AGENT': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1',
             'LOG_LEVEL': 'INFO',
@@ -60,13 +57,8 @@ class Crawler:
             'RETRY_ENABLED': False,
         })
 
-    def run(self, deep):
-        if deep:
-            self.engine.crawl(Spider, start_urls=self.right, allowed_domains=self.domains(self.left))
-        self.engine.crawl(Spider, start_urls=self.left, allowed_domains=self.domains(self.right))
+    def run(self):
+        self.engine.crawl(Spider, start_urls=self.sources, allowed_domains=self.targets)
         self.engine.start()
         return {'nodes': NODES, 'edges': EDGES}
 
-    @staticmethod
-    def domains(urls):
-        return [urlparse(url).netloc for url in urls]

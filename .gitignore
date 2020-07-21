@@ -4,3 +4,7 @@ venv/
 *.pdf
 *.csv
 __pycache__/
+build/
+dist/
+*.egg-info
+*.gv
